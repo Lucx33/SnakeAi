@@ -10,7 +10,7 @@ def format_value(value):
     else:
         return f"{value:.3f}"
 
-def plot(scores, mean_scores, avg_moves_to_apple):
+def plot(scores, mean_scores, avg_moves_to_apple, mean_avg_moves_to_apple):
     display.clear_output(wait=True)
     display.display(plt.gcf())
     plt.clf()
@@ -34,9 +34,12 @@ def plot(scores, mean_scores, avg_moves_to_apple):
     ax2.set_xlabel('Number of Games')
     ax2.set_ylabel('Average Moves')
     ax2.plot(avg_moves_to_apple, label='Average Moves to Apple', color = 'green')
+    ax2.plot(mean_avg_moves_to_apple, label='Mean Average Moves to Apple', linestyle='--', color = 'red')
     ax2.legend(loc='upper right')
     ax2.set_ylim(ymin=0)
     ax2.text(len(avg_moves_to_apple) - 1, avg_moves_to_apple[-1], format_value(avg_moves_to_apple[-1]))  # Conditional formatting
+    ax2.text(len(mean_avg_moves_to_apple) - 1, mean_avg_moves_to_apple[-1], format_value(mean_avg_moves_to_apple[-1]))  # Conditional formatting
+
 
     # Adjust layout
     plt.tight_layout()

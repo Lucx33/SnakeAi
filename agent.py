@@ -8,10 +8,13 @@ from helper import plot
 
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
+N_GAMES = 400
 
 LR = 0.001
 
-Load = False
+Load = True
+
+
 
 class Agent:
     def __init__(self):
@@ -23,7 +26,7 @@ class Agent:
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft()
         self.model = Linear_QNet(11, 256, 3)
         if Load:
-            model_path = './model/model.pth'
+            model_path = './model/model11.pth'
             try:
                 self.model.load_state_dict(torch.load(model_path))
                 print("Loaded model from", model_path)
@@ -152,7 +155,11 @@ class Agent:
                 else:
                     avg_moves_to_apple = 0
                 plot_avg_moves_to_apple.append(avg_moves_to_apple)
-                plot(plot_scores, plot_mean_scores, plot_avg_moves_to_apple)
+                plot_mean_avg_moves_to_apple.append(sum(plot_avg_moves_to_apple)/agent.n_games)
+                plot(plot_scores, plot_mean_scores, plot_avg_moves_to_apple, plot_mean_avg_moves_to_apple)
+
+                if agent.n_games == N_GAMES:
+                    break
 
 
 if __name__ == '__main__':
