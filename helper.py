@@ -10,13 +10,15 @@ def format_value(value):
     else:
         return f"{value:.3f}"
 
-def plot(scores, mean_scores, avg_moves_to_apple, mean_avg_moves_to_apple):
+def plot(scores, mean_scores, avg_moves_to_apple, mean_avg_moves_to_apple, model):
     display.clear_output(wait=True)
     display.display(plt.gcf())
     plt.clf()
 
     # Create a figure and a set of subplots
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(6, 8))  # 2 rows, 1 column
+    fig.suptitle(f"{model}", fontsize=16, fontweight='bold')
+
 
     # First subplot for scores and mean scores
     ax1.set_title('Score Development Over Games')

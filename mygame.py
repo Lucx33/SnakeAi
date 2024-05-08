@@ -3,7 +3,7 @@ import random
 import numpy as np
 
 SPEED = 500
-STUCK = 25000
+STUCK = 300
 
 compass = ['UP', 'RIGHT', 'DOWN', 'LEFT']
 
@@ -83,13 +83,15 @@ class SnakeGame:
         self.snake_body.insert(0, list(self.snake_pos))
         if self.snake_pos == self.food_pos:
             self.score += 1
-            self.movestoapple = 0
             if self.score > self.record:
                 self.record = self.score
-                reward = 15
-            else:
                 reward = 10
+            else:
+                reward = 5
+            if(self.movestoapple < 5000):
+                reward += 5
             self.food_spawn = False
+            self.movestoapple = 0
         else:
             self.snake_body.pop()
 
@@ -105,10 +107,10 @@ class SnakeGame:
         if ((self.snake_pos[0] >= self.width or self.snake_pos[0] < 0 or
                 self.snake_pos[1] >= self.height or self.snake_pos[1] < 0 or
                 self.snake_pos in self.snake_body[1:])):
-            reward = -10
+            reward = -5
             return reward, True, self.score
-        elif self.movestoapple > STUCK:
-            reward = -15
+        elif self.movestoapple > (STUCK * len(self.snake_pos)):
+            reward = -10
             return reward, True, self.score
 
         # Drawing everything on the screen
@@ -148,7 +150,7 @@ class SnakeGame:
         if pt[0] >= self.width or pt[0] < 0 or pt[1] >= self.height or pt[1] < 0:
             return True
         # Self collision
-        if pt in self.snake_body[1:]:
+        elif pt in self.snake_body[1:]:
             return True
         return False
 

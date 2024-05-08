@@ -8,7 +8,8 @@ from helper import plot
 
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
-N_GAMES = 400
+N_GAMES = 2000
+MODEL_NAME = 'test'
 
 LR = 0.001
 
@@ -20,13 +21,13 @@ class Agent:
     def __init__(self):
         self.n_games = 0
         self.epsilon = 0  # randomness
-        self.initial_epsilon = float(80)
+        self.initial_epsilon = float(60)
         self.min_epsilon = 0
         self.gamma = 0.9  # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft()
-        self.model = Linear_QNet(11, 256, 3)
+        self.model = Linear_QNet(14, 256, 3)
         if Load:
-            model_path = './model/model11.pth'
+            model_path = './model/'+MODEL_NAME+'.pth'
             try:
                 self.model.load_state_dict(torch.load(model_path))
                 print("Loaded model from", model_path)
@@ -36,10 +37,15 @@ class Agent:
 
     def get_state(self, game):
         head = game.snake_pos
-        point_l = [head[0] - 10, head[1]]
-        point_r = [head[0] + 10, head[1]]
-        point_u = [head[1] - 10, head[1]]
-        point_d = [head[1] + 10, head[1]]
+        point_l10 = [head[0] - 10, head[1]]
+        point_r10 = [head[0] + 10, head[1]]
+        point_u10 = [head[0], head[1] - 10]
+        point_d10 = [head[1], head[1] + 10]
+
+        point_l01 = [head[0] - 1, head[1]]
+        point_r01 = [head[0] + 1, head[1]]
+        point_u01 = [head[1], head[1] - 1]
+        point_d01 = [head[1], head[1] + 1]
 
         dir_l = game.direction == 'LEFT'
         dir_r = game.direction == 'RIGHT'
@@ -47,23 +53,41 @@ class Agent:
         dir_d = game.direction == 'DOWN'
 
         state = [
-            # Danger straight
-            (dir_r and game.is_collision(point_r)) or
-            (dir_l and game.is_collision(point_l)) or
-            (dir_u and game.is_collision(point_u)) or
-            (dir_d and game.is_collision(point_d)),
+            # Danger straight in 10 units
+            (dir_r and game.is_collision(point_r10)) or
+            (dir_l and game.is_collision(point_l10)) or
+            (dir_u and game.is_collision(point_u10)) or
+            (dir_d and game.is_collision(point_d10)),
 
-            # Danger right
-            (dir_u and game.is_collision(point_r)) or
-            (dir_d and game.is_collision(point_l)) or
-            (dir_l and game.is_collision(point_u)) or
-            (dir_r and game.is_collision(point_d)),
+            # Danger right in 10 units
+            (dir_u and game.is_collision(point_r10)) or
+            (dir_d and game.is_collision(point_l10)) or
+            (dir_l and game.is_collision(point_u10)) or
+            (dir_r and game.is_collision(point_d10)),
 
-            # Danger left
-            (dir_d and game.is_collision(point_r)) or
-            (dir_u and game.is_collision(point_l)) or
-            (dir_r and game.is_collision(point_u)) or
-            (dir_l and game.is_collision(point_d)),
+            # Danger left in 10 units
+            (dir_d and game.is_collision(point_r10)) or
+            (dir_u and game.is_collision(point_l10)) or
+            (dir_r and game.is_collision(point_u10)) or
+            (dir_l and game.is_collision(point_d10)),
+
+            # Perigo imediato à frente
+            (dir_r and game.is_collision(point_r01)) or
+            (dir_l and game.is_collision(point_l01)) or
+            (dir_u and game.is_collision(point_u01)) or
+            (dir_d and game.is_collision(point_d01)),
+
+            # Perigo imediato à direita
+            (dir_u and game.is_collision(point_r01)) or
+            (dir_d and game.is_collision(point_l01)) or
+            (dir_l and game.is_collision(point_u01)) or
+            (dir_r and game.is_collision(point_d01)),
+
+            # Perigo imediato à esquerda
+            (dir_d and game.is_collision(point_r01)) or
+            (dir_u and game.is_collision(point_l01)) or
+            (dir_r and game.is_collision(point_u01)) or
+            (dir_l and game.is_collision(point_d01)),
 
             # Move direction
             dir_l,
@@ -95,7 +119,7 @@ class Agent:
 
     def get_action(self, state):
         # random moves: tradeoff exploration / exploitation
-        self.epsilon = max(float(self.min_epsilon), self.initial_epsilon * (0.97 ** self.n_games) - 0.5)
+        self.epsilon = max(float(self.min_epsilon), self.initial_epsilon * (0.96 ** self.n_games) - 0.5)
         final_move = [0, 0, 0]
         if random.randint(0, 200) < self.epsilon:
             move = random.randint(0, 2)
@@ -156,7 +180,7 @@ class Agent:
                     avg_moves_to_apple = 0
                 plot_avg_moves_to_apple.append(avg_moves_to_apple)
                 plot_mean_avg_moves_to_apple.append(sum(plot_avg_moves_to_apple)/agent.n_games)
-                plot(plot_scores, plot_mean_scores, plot_avg_moves_to_apple, plot_mean_avg_moves_to_apple)
+                plot(plot_scores, plot_mean_scores, plot_avg_moves_to_apple, plot_mean_avg_moves_to_apple, MODEL_NAME)
 
                 if agent.n_games == N_GAMES:
                     break
