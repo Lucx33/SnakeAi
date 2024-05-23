@@ -9,11 +9,11 @@ from helper import plot
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
 N_GAMES = 2000
-MODEL_NAME = 'test'
+MODEL_NAME = '3.0'
 
 LR = 0.001
 
-Load = True
+Load = False
 
 
 
@@ -25,7 +25,7 @@ class Agent:
         self.min_epsilon = 0
         self.gamma = 0.9  # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft()
-        self.model = Linear_QNet(14, 256, 3)
+        self.model = Linear_QNet(15, 256, 3)
         if Load:
             model_path = './model/'+MODEL_NAME+'.pth'
             try:
@@ -99,7 +99,10 @@ class Agent:
             game.food_pos[0] < game.snake_pos[0],  # food left
             game.food_pos[0] > game.snake_pos[0],  # food right
             game.food_pos[1] < game.snake_pos[1],  # food up
-            game.food_pos[1] > game.snake_pos[1]  # food down
+            game.food_pos[1] > game.snake_pos[1],  # food down
+
+            # Size of Snake
+            len(game.snake_body)
         ]
         return np.array(state, dtype=int)
 
